@@ -61,8 +61,6 @@ public class AppointmentController {
 
         // check overlapping between the new appointment and all appointments created before
 
-        
-
         List<Appointment> appointments = new ArrayList<>();
 
         appointmentRepository.findAll().forEach(appointments::add);
@@ -73,7 +71,7 @@ public class AppointmentController {
         
         for (Appointment existingAppointment : appointments){
             
-            if ( a.overlaps(existingAppointment)){
+            if (a.overlaps(existingAppointment)){
 
                 if (a.getRoom().getRoomName().equals(existingAppointment.getRoom().getRoomName())){
                     return new ResponseEntity<List<Appointment>>(appointments, HttpStatus.NOT_ACCEPTABLE);
