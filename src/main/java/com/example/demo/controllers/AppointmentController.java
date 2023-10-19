@@ -61,20 +61,32 @@ public class AppointmentController {
 
         // check overlapping between the new appointment and all appointments created before
 
+        
+
         List<Appointment> appointments = new ArrayList<>();
 
         appointmentRepository.findAll().forEach(appointments::add);
 
+        if (! a.getFinishesAt().isAfter(a.getStartsAt())){
+                return new ResponseEntity<List<Appointment>>(appointments, HttpStatus.BAD_REQUEST);
+        }
+        
         for (Appointment existingAppointment : appointments){
-            if (a.overlaps(existingAppointment)){
-                return new ResponseEntity<>("The new appointment overlaps with existing appointments.", HttpStatus.BAD_REQUEST);
+            
+            if ( a.overlaps(existingAppointment)){
+
+                if (a.getRoom().getRoomName().equals(existingAppointment.getRoom().getRoomName())){
+                    return new ResponseEntity<List<Appointment>>(appointments, HttpStatus.NOT_ACCEPTABLE);
+                }
             }
         }
 
         // if there is no overlap, save the "a" appointment
-
+        
         appointmentRepository.save(a);
-        return new ResponseEntity<>(a, HttpStatus.CREATED);
+
+        appointments.add(a);
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
 
     @DeleteMapping("/appointments/{id}")
