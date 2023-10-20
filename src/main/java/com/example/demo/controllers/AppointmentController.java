@@ -56,9 +56,37 @@ public class AppointmentController {
          * Implement this function, which acts as the POST /api/appointment endpoint.
          * Make sure to check out the whole project. Specially the Appointment.java class
          */
-        return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
-    }
 
+        Appointment a = new Appointment(appointment.getPatient(), appointment.getDoctor(), appointment.getRoom(), appointment.getStartsAt(), appointment.getFinishesAt());
+
+        // check overlapping between the new appointment and all appointments created before
+
+        List<Appointment> appointments = new ArrayList<>();
+
+        appointmentRepository.findAll().forEach(appointments::add);
+
+        if (! a.getFinishesAt().isAfter(a.getStartsAt())){
+                return new ResponseEntity<List<Appointment>>(appointments, HttpStatus.BAD_REQUEST);
+        }
+        
+        for (Appointment existingAppointment : appointments){
+            
+            if (a.overlaps(existingAppointment)){
+
+                if (a.getRoom().getRoomName().equals(existingAppointment.getRoom().getRoomName())){
+                    return new ResponseEntity<List<Appointment>>(appointments, HttpStatus.NOT_ACCEPTABLE);
+                }
+            }
+        }
+
+        // if there is no overlap, save the "a" appointment
+        
+        appointmentRepository.save(a);
+
+        // also add a to the appointments list
+        appointments.add(a);
+        return new ResponseEntity<>(appointments, HttpStatus.OK);
+    }
 
     @DeleteMapping("/appointments/{id}")
     public ResponseEntity<HttpStatus> deleteAppointment(@PathVariable("id") long id){
