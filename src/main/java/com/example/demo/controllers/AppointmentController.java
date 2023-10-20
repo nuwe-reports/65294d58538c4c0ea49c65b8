@@ -83,6 +83,7 @@ public class AppointmentController {
         
         appointmentRepository.save(a);
 
+        // also add a to the appointments list
         appointments.add(a);
         return new ResponseEntity<>(appointments, HttpStatus.OK);
     }
